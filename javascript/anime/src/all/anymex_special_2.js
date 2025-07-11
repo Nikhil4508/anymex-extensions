@@ -1,12 +1,12 @@
 const mangayomiSources = [{
     "name": "Anymex Special #2",
     "lang": "All",
-    "baseUrl": "https://anymex.vercel.app/",
+    "baseUrl": "https://moviebox.ng/",
     "apiUrl": "",
     "iconUrl": "https://raw.githubusercontent.com/RyanYuuki/AnymeX/main/assets/images/logo.png",
     "typeSource": "multi",
     "itemType": 1,
-    "version": "0.0.1",
+    "version": "0.0.2",
     "pkgPath": "anime/src/all/anymex_special_2.js"
 }];
 
