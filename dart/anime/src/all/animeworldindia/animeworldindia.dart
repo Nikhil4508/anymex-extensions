@@ -4,26 +4,6 @@ import 'dart:convert';
 class WatchAnimeWorldClient extends MProvider {
   WatchAnimeWorldClient({required this.source});
 
-  final MSource source;
-
-  @override
-  String get name => "WatchAnimeWorld";
-
-  @override
-  String get lang => "en";
-
-  @override
-  String get baseUrl => "https://watchanimeworld.in";
-
-  @override
-  bool get supportsLatest => true;
-
-  @override
-  String get id => "watchanimeworld";
-
-  @override
-  String get version => "8.0.6"; // Updated version with better season support
-
   String _buildUrl(String path) {
     if (path.startsWith("http")) return path;
     if (path.startsWith("//")) return "https:$path";
