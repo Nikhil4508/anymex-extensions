@@ -73,8 +73,9 @@ class DefaultExtension extends MProvider {
             const mixedResults = [];
 
             for (let i = 0; i < maxLength; i++) {
-                if (i < movies.length) mixedResults.push(movies[i]);
                 if (i < series.length) mixedResults.push(series[i]);
+                if (i < movies.length) mixedResults.push(movies[i]);
+
             }
 
             return {
@@ -144,37 +145,57 @@ class DefaultExtension extends MProvider {
             this.client.get(url),
             this.client.get(`${url}?lang=Hindi`),
         ]);
-    
-        const result = [];
-    
+
         const parseResponse = (response, langLabel) => {
             try {
                 const data = JSON.parse(response.body);
-                console.log("Fetched Data => ", data);
-                return data.data.downloads.map((stream) => ({
-                    url: stream.url,
-                    quality: `${langLabel} - ${stream.resolution}`,
-                    originalUrl: stream.url,
-                    subtitles: data.data.captions.map((sub) => ({
-                        file: sub.url,
-                        label: sub.lanName,
-                    })),
-                    headers: {
-                        Referer: "https://moviebox.ng/",
-                        Origin: "https://moviebox.ng",
-                    },
-                }));
+                console.log(`Fetched ${langLabel} Data =>`, data);
+
+                if (data?.streams) {
+                    return data.streams.map((stream) => ({
+                        url: stream.stream_url,
+                        quality: stream.quality,
+                        originalUrl: stream.stream_url,
+                        subtitles: [],
+                        headers: {
+                            Referer: "https://moviebox.ng/",
+                            Origin: "https://moviebox.ng",
+                        },
+                    }));
+                }
+
+                if (data?.data?.downloads) {
+                    return data.data.downloads.map((stream) => ({
+                        url: stream.url,
+                        quality: `${langLabel} - ${stream.resolution}`,
+                        originalUrl: stream.url,
+                        subtitles: (data.data.captions || []).map((sub) => ({
+                            file: sub.url,
+                            label: sub.lanName,
+                        })),
+                        headers: {
+                            Referer: "https://moviebox.ng/",
+                            Origin: "https://moviebox.ng",
+                        },
+                    }));
+                }
+
+                return [];
             } catch (err) {
                 console.warn(`Failed to parse ${langLabel} response:`, err);
                 return [];
             }
         };
-    
-        result.push(...parseResponse(engResponse, "English"));
-        result.push(...parseResponse(hindiResponse, "Hindi"));
-    
-        return result;
-    }    
+
+        const engResults = parseResponse(engResponse, "English");
+        const hindiResults = parseResponse(hindiResponse, "Hindi");
+
+        const areSame = JSON.stringify(engResults) === JSON.stringify(hindiResults);
+
+        return areSame ? engResults : [...engResults, ...hindiResults];
+    }
+
+
 
     // For manga chapter pages
     async getPageList(url) {
