@@ -1,12 +1,12 @@
 const mangayomiSources = [{
     "name": "Anymex Special #3",
     "lang": "en",
-    "baseUrl": "https://www.cineby.app",
+    "baseUrl": "https://www.cineby.app/",
     "apiUrl": "",
     "iconUrl": "https://raw.githubusercontent.com/RyanYuuki/AnymeX/main/assets/images/logo.png",
     "typeSource": "multi",
     "itemType": 1,
-    "version": "0.0.1",
+    "version": "0.0.2",
     "pkgPath": "anime/src/en/anymex_special_3.js"
 }];
 
