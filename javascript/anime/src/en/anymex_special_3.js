@@ -93,7 +93,7 @@ class DefaultExtension extends MProvider {
             name: json.details.title,
             imageUrl: json.details.thumbnail,
             description: json.details.description,
-            chapters: chapters,
+            chapters: chapters.reverse(),
         };
     }
     // For novel html content
