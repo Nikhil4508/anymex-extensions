@@ -6,7 +6,7 @@ const mangayomiSources = [{
     "iconUrl": "https://raw.githubusercontent.com/RyanYuuki/AnymeX/main/assets/images/logo.png",
     "typeSource": "multi",
     "itemType": 1,
-    "version": "0.0.2",
+    "version": "0.0.3",
     "pkgPath": "anime/src/all/anymex_special_2.js"
 }];
 
@@ -102,7 +102,6 @@ class DefaultExtension extends MProvider {
         if (!tmdbId) throw new Error("Invalid TMDB ID in URL");
 
         if (isMovie) {
-            const releaseDate = parsedData.release_date;
             chapters.push({
                 name: "Movie",
                 url: `https://oc.autoembed.cc/movie/${tmdbId}`,
