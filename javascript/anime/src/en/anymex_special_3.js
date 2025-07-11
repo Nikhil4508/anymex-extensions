@@ -6,7 +6,7 @@ const mangayomiSources = [{
     "iconUrl": "https://raw.githubusercontent.com/RyanYuuki/AnymeX/main/assets/images/logo.png",
     "typeSource": "multi",
     "itemType": 1,
-    "version": "0.0.2",
+    "version": "0.0.3",
     "pkgPath": "anime/src/en/anymex_special_3.js"
 }];
 
@@ -107,7 +107,7 @@ class DefaultExtension extends MProvider {
     // For anime episode video list
     async getVideoList(url) {
         const [subResp, dubResp] = await Promise.all([
-            this.client.get(url),
+            this.client.get(url + '&dub=false'),
             this.client.get(url + '&dub=true')
         ]);
 
