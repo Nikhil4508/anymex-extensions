@@ -40,7 +40,16 @@ class DefaultExtension extends MProvider {
             query
         )}&page=1&include_adult=false`;
 
-        const resp = await this.client.get(url);
+        // Log headers for debugging
+        const headers = { 
+            Referer: "https://moviebox.ng/", 
+            Origin: "https://moviebox.ng",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 Node.js/18.16.0"
+        };
+        console.log("[requestSearch] URL:", url);
+        console.log("[requestSearch] Headers:", headers);
+
+        const resp = await this.client.get(url, headers);
         const data = JSON.parse(resp.body);
         return data;
     }
@@ -89,7 +98,16 @@ class DefaultExtension extends MProvider {
     }
 
     async getDetail(url) {
-        const resp = await this.client.get(url);
+        // Log headers for debugging
+        const headers = { 
+            Referer: "https://moviebox.ng/", 
+            Origin: "https://moviebox.ng",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 Node.js/18.16.0"
+        };
+        console.log("[getDetail] URL:", url);
+        console.log("[getDetail] Headers:", headers);
+
+        const resp = await this.client.get(url, headers);
         const parsedData = JSON.parse(resp.body);
         const isMovie = url.includes("movie");
 
@@ -140,11 +158,15 @@ class DefaultExtension extends MProvider {
     }
 
     async getVideoList(url) {
-        const [engResponse, hindiResponse] = await Promise.all([
-            this.client.get(url),
-            this.client.get(`${url}?lang=Hindi`),
-        ]);
+        const headers = { 
+            Referer: "https://moviebox.ng/", 
+            Origin: "https://moviebox.ng",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 Node.js/18.16.0"
+        };
+        console.log("[getVideoList] URL:", url);
+        console.log("[getVideoList] Headers:", headers);
 
+        // Helper to parse the response
         const parseResponse = (response, langLabel) => {
             try {
                 const data = JSON.parse(response.body);
@@ -186,12 +208,34 @@ class DefaultExtension extends MProvider {
             }
         };
 
-        const engResults = parseResponse(engResponse, "English");
-        const hindiResults = parseResponse(hindiResponse, "Hindi");
+        // Try original URL first
+        const [engResponse, hindiResponse] = await Promise.all([
+            this.client.get(url, headers),
+            this.client.get(`${url}?lang=Hindi`, headers),
+        ]);
+        let engResults = parseResponse(engResponse, "English");
+        let hindiResults = parseResponse(hindiResponse, "Hindi");
+        let areSame = JSON.stringify(engResults) === JSON.stringify(hindiResults);
+        let combined = areSame ? engResults : [...engResults, ...hindiResults];
 
-        const areSame = JSON.stringify(engResults) === JSON.stringify(hindiResults);
+        // If no results, try fallback to season 1 (if not already season 1)
+        if (combined.length === 0) {
+            // Try to replace /tv/{id}/{season}/ with /tv/{id}/1/
+            const fallbackUrl = url.replace(/(\/tv\/\d+\/)(\d+)(\/\d+)/, (m, p1, p2, p3) => `${p1}1${p3}`);
+            if (fallbackUrl !== url) {
+                console.log("[getVideoList] Fallback to season 1 URL:", fallbackUrl);
+                const [engFallback, hindiFallback] = await Promise.all([
+                    this.client.get(fallbackUrl, headers),
+                    this.client.get(`${fallbackUrl}?lang=Hindi`, headers),
+                ]);
+                engResults = parseResponse(engFallback, "English (S1 fallback)");
+                hindiResults = parseResponse(hindiFallback, "Hindi (S1 fallback)");
+                areSame = JSON.stringify(engResults) === JSON.stringify(hindiResults);
+                combined = areSame ? engResults : [...engResults, ...hindiResults];
+            }
+        }
 
-        return areSame ? engResults : [...engResults, ...hindiResults];
+        return combined;
     }
 
 
